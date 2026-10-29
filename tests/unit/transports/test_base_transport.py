@@ -154,6 +154,20 @@ class TestBaseTransport:
         assert headers["Custom-Header"] == "custom-value"
         assert headers["User-Agent"] == AIPERF_USER_AGENT
 
+    def test_build_headers_current_turn_headers_override_endpoint_headers(
+        self, transport, request_info
+    ):
+        """The current turn's extra_headers win over endpoint headers on the same key."""
+        request_info.endpoint_headers = {"Host": "endpoint.example", "X-Keep": "kept"}
+        request_info.turns = [
+            Turn(extra_headers={"Host": "earlier-turn.example"}),
+            Turn(extra_headers={"Host": "row.example", "X-Row": "row"}),
+        ]
+        headers = transport.build_headers(request_info)
+        assert headers["Host"] == "row.example"
+        assert headers["X-Row"] == "row"
+        assert headers["X-Keep"] == "kept"
+
     def test_build_headers_dynamo_session_header_root_has_no_parent(
         self,
         transport: FakeTransport,

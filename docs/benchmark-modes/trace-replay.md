@@ -53,6 +53,7 @@ Required fields for trace replay:
 - `hash_ids`: List of block hashes (optional)
 - `tools`: List of OpenAI-compatible tool definitions (optional, requires `messages`)
 - `extra`: Dict of vendor extras (optional). Shallow-merged into the top of the request body at dispatch; user-supplied keys win over `--extra-inputs`.
+- `headers`: Dict of HTTP headers (optional). Merged into the request headers at dispatch; per-entry values win over `--header` for the same name.
 
 Example entry:
 
@@ -193,6 +194,15 @@ Use the `extra` field to inject arbitrary key-value pairs into the HTTP payload 
 ```
 
 **Merge semantics:** Merging is shallow — a per-entry `{"nvext": {...}}` replaces the entire global `nvext` key. Deep merge is not performed.
+
+## Per-Request Headers
+
+Use the `headers` field to send HTTP headers with individual trace entries, for example a routing or session-affinity key that differs per request. Per-entry values override `--header` values with the same name. Headers are not part of the workload shape: trace synthesis (`--synthesis-*`) leaves them unchanged.
+
+```json
+{"input_length": 100, "output_length": 50, "timestamp": 0, "headers": {"x-session-token": "abc"}}
+{"input_length": 200, "output_length": 30, "timestamp": 500, "headers": {"x-session-token": "def"}}
+```
 
 ## Profile using real Mooncake Trace
 

@@ -259,6 +259,7 @@ class MooncakeTraceDatasetLoader(BaseTraceDatasetLoader[MooncakeTrace]):
                 max_tokens=trace.output_length,
                 raw_payload=trace.payload,
                 extra_body=trace.extra,
+                extra_headers=trace.headers,
             )
         if trace.messages is not None:
             return Turn(
@@ -268,10 +269,13 @@ class MooncakeTraceDatasetLoader(BaseTraceDatasetLoader[MooncakeTrace]):
                 raw_messages=trace.messages,
                 raw_tools=trace.tools,
                 extra_body=trace.extra,
+                extra_headers=trace.headers,
             )
         turn = super()._build_turn(trace, prompt)
         if trace.extra is not None:
             turn.extra_body = trace.extra
+        if trace.headers is not None:
+            turn.extra_headers = trace.headers
         return turn
 
     # ------------------------------------------------------------------
@@ -279,9 +283,17 @@ class MooncakeTraceDatasetLoader(BaseTraceDatasetLoader[MooncakeTrace]):
     # ------------------------------------------------------------------
 
     def _synthesis_exclude_fields(self) -> frozenset[str]:
-        return frozenset({"type"})
+        # Headers are opaque request metadata, not workload shape: they bypass
+        # the Synthesizer and are re-attached from the originals.
+        return frozenset({"type", "headers"})
 
     def _reconstruct_traces(
         self, originals: list[MooncakeTrace], synth_dicts: list[dict[str, Any]]
     ) -> list[MooncakeTrace]:
-        return [MooncakeTrace.model_validate(t) for t in synth_dicts]
+        result: list[MooncakeTrace] = []
+        for i, synth_dict in enumerate(synth_dicts):
+            original = originals[i] if i < len(originals) else originals[-1]
+            trace = MooncakeTrace.model_validate(synth_dict)
+            trace.headers = original.headers
+            result.append(trace)
+        return result

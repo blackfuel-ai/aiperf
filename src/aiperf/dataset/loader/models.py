@@ -302,6 +302,7 @@ class MooncakeTrace(AIPerfBaseModel):
     - With payload: {"payload": {"prompt": "Hello", "max_tokens": 50}, "timestamp": 1000}
     - With timestamp and hash ID: {"timestamp": 1000, "input_length": 10, "hash_ids": [123]}
     - Delta messages: {"session_id": "s1", "assistant_responses": "live", "messages": [{"role": "user", "content": "Hi"}]}
+    - With per-row headers: {"input_length": 10, "headers": {"x-session-token": "abc"}}
     """
 
     type: Literal[CustomDatasetType.MOONCAKE_TRACE] = CustomDatasetType.MOONCAKE_TRACE
@@ -357,6 +358,10 @@ class MooncakeTrace(AIPerfBaseModel):
     extra: dict[str, Any] | None = Field(
         default=None,
         description="Per-turn extra fields shallow-merged into the request body at dispatch time. Keys override formatter defaults on collision.",
+    )
+    headers: dict[str, str] | None = Field(
+        default=None,
+        description="Per-turn HTTP headers merged into the request at dispatch time. Keys override endpoint headers on collision.",
     )
 
     @model_validator(mode="after")

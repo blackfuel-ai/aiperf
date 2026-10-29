@@ -1756,3 +1756,36 @@ class TestMooncakeTraceSynthesisIntegration:
         trace = result["session-1"][0]
         assert trace.messages == messages
         assert trace.timestamp == 250
+
+    def test_synthesis_preserves_headers(self, mock_prompt_generator):
+        """Per-row headers bypass the Synthesizer and come back unchanged."""
+        data = {
+            "session-1": [
+                MooncakeTrace(
+                    input_length=1024,
+                    output_length=64,
+                    hash_ids=[1, 2],
+                    timestamp=1000,
+                    headers={"x-lane": "a"},
+                ),
+                MooncakeTrace(
+                    input_length=1536,
+                    output_length=64,
+                    hash_ids=[1, 2, 3],
+                    timestamp=2000,
+                ),
+            ],
+        }
+        cli_config = make_synthesis_config(speedup_ratio=2.0, prefix_len_multiplier=2.0)
+
+        loader = MooncakeTraceDatasetLoader(
+            filename="dummy.jsonl",
+            run=make_run_from_cli(cli_config),
+            prompt_generator=mock_prompt_generator,
+        )
+
+        result = loader._apply_synthesis(data)
+
+        assert result["session-1"][0].headers == {"x-lane": "a"}
+        assert result["session-1"][0].timestamp == 500
+        assert result["session-1"][1].headers is None

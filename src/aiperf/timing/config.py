@@ -614,6 +614,19 @@ def _agentic_warmup_grace_period(phase: PhaseConfig) -> float | None:
     return float("inf")
 
 
+def _agentic_warmup_prefill_concurrency(phase: PhaseConfig) -> int | None:
+    """Prefill cap for the synthesized AGENTIC_REPLAY warmup.
+
+    Explicit ``--agentic-warmup-prefill-concurrency`` wins; otherwise the
+    warmup inherits the profiling phase's ``prefill_concurrency``. The
+    warmup cap never reaches the profiling phase.
+    """
+    warmup_cap = getattr(phase, "agentic_warmup_prefill_concurrency", None)
+    if warmup_cap is not None:
+        return warmup_cap
+    return getattr(phase, "prefill_concurrency", None)
+
+
 def _build_agentic_warmup_config(phase: PhaseConfig) -> CreditPhaseConfig | None:
     """Build the AGENTIC_REPLAY auto-warmup phase from the profiling PhaseConfig.
 
@@ -670,7 +683,7 @@ def _build_agentic_warmup_config(phase: PhaseConfig) -> CreditPhaseConfig | None
         expected_duration_sec=None,
         expected_num_sessions=None,
         concurrency=concurrency,
-        prefill_concurrency=getattr(phase, "prefill_concurrency", None),
+        prefill_concurrency=_agentic_warmup_prefill_concurrency(phase),
         request_rate=None,
         arrival_pattern=ArrivalPattern.CONCURRENCY_BURST,
         arrival_smoothness=getattr(phase, "smoothness", None),

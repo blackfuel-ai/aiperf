@@ -1382,6 +1382,11 @@ Deterministic agentic cache-pressure warmup request budget per concurrency lane,
 AGENTIC_REPLAY only: grace period in seconds the auto-synthesized warmup barrier waits for in-flight priming requests after the warmup burst sends. The agentic warmup is synthesized from the profiling phase rather than a user-declared warmup phase, so it does NOT honor `--warmup-grace-period` (which requires `--warmup-duration`). If not set, the warmup barrier waits indefinitely until every primed trajectory returns.
 <br/>_Constraints: ≥ 0_
 
+#### `--agentic-warmup-prefill-concurrency` `<int>`
+
+AGENTIC_REPLAY only: maximum number of auto-synthesized warmup requests in prefill at once; the rest wait client-side until a slot frees on first token. The agentic warmup is synthesized from the profiling phase rather than a user-declared warmup phase, so it does NOT honor `--warmup-prefill-concurrency`. Bounds how long the full-context snapshot primers queue at the server, which a gateway or endpoint picker with a request queue timeout otherwise evicts at high concurrency. If not set, the warmup inherits `--prefill-concurrency`.
+<br/>_Constraints: ≥ 1_
+
 #### `--num-warmup-sessions` `<int>`
 
 The number of sessions to use for the warmup phase. If not set, it will use the `--warmup-request-count` value.
@@ -3029,6 +3034,11 @@ Deterministic agentic cache-pressure warmup request budget per concurrency lane,
 AGENTIC_REPLAY only: grace period in seconds the auto-synthesized warmup barrier waits for in-flight priming requests after the warmup burst sends. The agentic warmup is synthesized from the profiling phase rather than a user-declared warmup phase, so it does NOT honor `--warmup-grace-period` (which requires `--warmup-duration`). If not set, the warmup barrier waits indefinitely until every primed trajectory returns.
 <br/>_Constraints: ≥ 0_
 
+#### `--agentic-warmup-prefill-concurrency` `<int>`
+
+AGENTIC_REPLAY only: maximum number of auto-synthesized warmup requests in prefill at once; the rest wait client-side until a slot frees on first token. The agentic warmup is synthesized from the profiling phase rather than a user-declared warmup phase, so it does NOT honor `--warmup-prefill-concurrency`. Bounds how long the full-context snapshot primers queue at the server, which a gateway or endpoint picker with a request queue timeout otherwise evicts at high concurrency. If not set, the warmup inherits `--prefill-concurrency`.
+<br/>_Constraints: ≥ 1_
+
 #### `--num-warmup-sessions` `<int>`
 
 The number of sessions to use for the warmup phase. If not set, it will use the `--warmup-request-count` value.
@@ -4670,6 +4680,11 @@ Deterministic agentic cache-pressure warmup request budget per concurrency lane,
 
 AGENTIC_REPLAY only: grace period in seconds the auto-synthesized warmup barrier waits for in-flight priming requests after the warmup burst sends. The agentic warmup is synthesized from the profiling phase rather than a user-declared warmup phase, so it does NOT honor `--warmup-grace-period` (which requires `--warmup-duration`). If not set, the warmup barrier waits indefinitely until every primed trajectory returns.
 <br/>_Constraints: ≥ 0_
+
+#### `--agentic-warmup-prefill-concurrency` `<int>`
+
+AGENTIC_REPLAY only: maximum number of auto-synthesized warmup requests in prefill at once; the rest wait client-side until a slot frees on first token. The agentic warmup is synthesized from the profiling phase rather than a user-declared warmup phase, so it does NOT honor `--warmup-prefill-concurrency`. Bounds how long the full-context snapshot primers queue at the server, which a gateway or endpoint picker with a request queue timeout otherwise evicts at high concurrency. If not set, the warmup inherits `--prefill-concurrency`.
+<br/>_Constraints: ≥ 1_
 
 #### `--num-warmup-sessions` `<int>`
 
@@ -6819,6 +6834,11 @@ Deterministic agentic cache-pressure warmup request budget per concurrency lane,
 
 AGENTIC_REPLAY only: grace period in seconds the auto-synthesized warmup barrier waits for in-flight priming requests after the warmup burst sends. The agentic warmup is synthesized from the profiling phase rather than a user-declared warmup phase, so it does NOT honor `--warmup-grace-period` (which requires `--warmup-duration`). If not set, the warmup barrier waits indefinitely until every primed trajectory returns.
 <br/>_Constraints: ≥ 0_
+
+#### `--agentic-warmup-prefill-concurrency` `<int>`
+
+AGENTIC_REPLAY only: maximum number of auto-synthesized warmup requests in prefill at once; the rest wait client-side until a slot frees on first token. The agentic warmup is synthesized from the profiling phase rather than a user-declared warmup phase, so it does NOT honor `--warmup-prefill-concurrency`. Bounds how long the full-context snapshot primers queue at the server, which a gateway or endpoint picker with a request queue timeout otherwise evicts at high concurrency. If not set, the warmup inherits `--prefill-concurrency`.
+<br/>_Constraints: ≥ 1_
 
 #### `--num-warmup-sessions` `<int>`
 

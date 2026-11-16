@@ -2667,6 +2667,26 @@ class CLIConfig(BaseConfig):
         ),
     ] = None
 
+    agentic_warmup_prefill_concurrency: Annotated[
+        int | None,
+        Field(
+            ge=1,
+            description="AGENTIC_REPLAY only: maximum number of auto-synthesized "
+            "warmup requests in prefill at once; the rest wait client-side until "
+            "a slot frees on first token. The agentic warmup is synthesized from "
+            "the profiling phase rather than a user-declared warmup phase, so it "
+            "does NOT honor `--warmup-prefill-concurrency`. Bounds how long the "
+            "full-context snapshot primers queue at the server, which a gateway "
+            "or endpoint picker with a request queue timeout otherwise evicts at "
+            "high concurrency. If not set, the warmup inherits "
+            "`--prefill-concurrency`.",
+        ),
+        CLIParameter(
+            name=("--agentic-warmup-prefill-concurrency",),
+            group=Groups.WARMUP,
+        ),
+    ] = None
+
     warmup_num_sessions: Annotated[
         int | None,
         Field(

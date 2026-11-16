@@ -267,3 +267,52 @@ def test_agentic_warmup_phase_name_is_a_safe_path_segment() -> None:
         AGENTIC_WARMUP_PHASE_NAME.split(".", 1)[0].upper()
         not in BasePhaseConfig._windows_reserved_phase_names
     )
+
+
+def test_warmup_prefill_concurrency_defaults_to_profiling_prefill_concurrency() -> None:
+    """With no ``agentic_warmup_prefill_concurrency`` set, the agentic warmup inherits the profiling phase's ``prefill_concurrency`` (unset by default)."""
+    phase = _ar_profiling_phase()
+    warmup = _build_agentic_warmup_config(phase)
+    assert warmup is not None
+    assert warmup.prefill_concurrency is None
+
+
+def test_warmup_prefill_concurrency_uses_agentic_warmup_prefill_concurrency() -> None:
+    """``agentic_warmup_prefill_concurrency`` caps the warmup primers in prefill without capping the profiling phase."""
+    phase = _PHASE_ADAPTER.validate_python(
+        {
+            "name": "profiling",
+            "type": "concurrency",
+            "concurrency": 128,
+            "duration": 900,
+            "timing_mode": TimingMode.AGENTIC_REPLAY,
+            "agentic_warmup_prefill_concurrency": 8,
+        }
+    )
+    warmup = _build_agentic_warmup_config(phase)
+    assert warmup is not None
+    assert warmup.prefill_concurrency == 8
+    profiling = _build_profiling_config(
+        phase,
+        default_cancellation=RequestCancellationConfig(),
+        phase_index=0,
+        profiling_index=0,
+    )
+    assert profiling.prefill_concurrency is None
+
+
+def test_warmup_prefill_concurrency_above_concurrency_raises() -> None:
+    """A warmup prefill cap above the lane count can never bind and is refused, as ``prefill_concurrency`` is."""
+    with pytest.raises(
+        pydantic.ValidationError, match="agentic_warmup_prefill_concurrency"
+    ):
+        _PHASE_ADAPTER.validate_python(
+            {
+                "name": "profiling",
+                "type": "concurrency",
+                "concurrency": 8,
+                "duration": 900,
+                "timing_mode": TimingMode.AGENTIC_REPLAY,
+                "agentic_warmup_prefill_concurrency": 16,
+            }
+        )

@@ -392,6 +392,23 @@ class BasePhaseConfig(AdaptiveScalePhaseMixin, BaseConfig):
         ),
     ]
 
+    agentic_warmup_prefill_concurrency: Annotated[
+        int | None,
+        Field(
+            default=None,
+            ge=1,
+            description="AGENTIC_REPLAY only: maximum number of auto-synthesized "
+            "warmup requests in prefill at once. Read off the profiling phase by "
+            "``timing.config._build_agentic_warmup_config`` (the agentic warmup "
+            "is not a user-declared phase, so it does not inherit "
+            "``--warmup-prefill-concurrency``). The snapshot primers each carry a "
+            "trajectory's full context; issued together at high concurrency they "
+            "queue behind one another at the server, and a gateway or endpoint "
+            "picker that bounds queue time evicts the tail, which fails the "
+            "warmup. None inherits the profiling phase's ``prefill_concurrency``.",
+        ),
+    ]
+
     _failed_request_threshold_explicitly_set: bool = False
     _trajectory_start_min_ratio_explicitly_set: bool = False
     _trajectory_start_max_ratio_explicitly_set: bool = False
@@ -465,6 +482,15 @@ class BasePhaseConfig(AdaptiveScalePhaseMixin, BaseConfig):
         ):
             raise ValueError(
                 f"Phase '{self.name}': prefill_concurrency must be <= concurrency"
+            )
+        if (
+            self.agentic_warmup_prefill_concurrency is not None
+            and self.concurrency is not None
+            and self.agentic_warmup_prefill_concurrency > self.concurrency
+        ):
+            raise ValueError(
+                f"Phase '{self.name}': agentic_warmup_prefill_concurrency must be "
+                "<= concurrency"
             )
         if self.grace_period is not None and self.duration is None:
             raise ValueError(

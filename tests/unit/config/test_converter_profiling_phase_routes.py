@@ -1368,3 +1368,24 @@ class TestSearchSpacePhaseShapeInference:
         prof = build_profiling(user)
         assert prof["type"] == PhaseType.CONCURRENCY
         assert "rate" not in prof
+
+
+class TestAgenticWarmupPrefillConcurrencyRouting:
+    def test_agentic_warmup_prefill_concurrency_routes_onto_profiling_phase(self):
+        """--agentic-warmup-prefill-concurrency lands on the profiling phase dict,
+        which the synthesized agentic warmup reads; --warmup-prefill-concurrency
+        only feeds a user-declared warmup phase and never reaches it."""
+        loadgen = CLIConfig(
+            concurrency=8,
+            request_count=10,
+            agentic_warmup_prefill_concurrency=4,
+        )
+        user = _make_user(loadgen=loadgen)
+        prof = build_profiling(user)
+        assert prof["agentic_warmup_prefill_concurrency"] == 4
+
+    def test_agentic_warmup_prefill_concurrency_absent_when_unset(self):
+        loadgen = CLIConfig(concurrency=8, request_count=10)
+        user = _make_user(loadgen=loadgen)
+        prof = build_profiling(user)
+        assert "agentic_warmup_prefill_concurrency" not in prof
